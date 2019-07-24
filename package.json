@@ -1,0 +1,21 @@
+{
+  "name": "translate-md-viewer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "parcel index.html",
+    "build": "parcel build index.html --public-url ."
+  },
+  "keywords": [],
+  "author": "hua1995116 <qiufneghyf@gmail.com> (https://github.com/hua1995116)",
+  "license": "MIT",
+  "dependencies": {
+    "@vitalets/google-translate-token": "^1.1.0",
+    "axios": "^0.19.0",
+    "google-translate-api-browser": "^1.1.71",
+    "google-translate-token": "^1.0.0",
+    "medium-parser": "^0.1.0",
+    "parcel-bundler": "^1.12.3"
+  }
+}
