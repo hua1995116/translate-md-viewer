@@ -2,7 +2,7 @@
 
 const MEDIUM_IMG_CDN = 'https://cdn-images-1.medium.com/max/';
 
-function exportMedium() {
+function exportMedium(callback) {
   chrome.tabs.query({ active: true, currentWindow: true }, function (arrayOfTabs) {
     const activeTab = arrayOfTabs[0]
     const url = activeTab.url + '?format=json'
@@ -38,6 +38,7 @@ function exportMedium() {
         saveHistory(title, activeTab.url)
 
         localStorage.setItem('translate', markdownText);
+        callback();
       })
       .catch(function (err) {
         console.error(err)
@@ -46,6 +47,7 @@ function exportMedium() {
                   '.\nIt is appreciated that you can attach the error information at [issue](https://github.com/neal1991/export-medium/issues). '
                   + 'You can click the "copy to clipboard" button to copy the information to the clipboard. Thanks.'
         localStorage.setItem('translate', markdownText);
+        callback();
       })
   })
 }

@@ -17,7 +17,6 @@
       </el-option>
     </el-select>
     <el-button class="translate-item" :loading="loading" type="primary" @click="handleTranslate">Translate</el-button>
-    <el-button class="translate-item" type="primary" @click="handleLook">Look Result</el-button>
   </div>
 </template>
 
@@ -48,13 +47,12 @@ export default {
   methods: {
     handleTranslate() {
       this.loading = true;
-      exportMedium();
-      localStorage.setItem('language', this.value);
-      this.loading = false;
+      exportMedium(() => {
+        localStorage.setItem('language', this.value);
+        this.loading = false;
+        chrome.tabs.create({url: chrome.extension.getURL('./dist/index.html')});
+      });
     },
-    handleLook() {
-      chrome.tabs.create({url: chrome.extension.getURL('./dist/index.html')});
-    }
   }
 }
 
