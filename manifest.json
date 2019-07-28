@@ -1,20 +1,25 @@
 {
-    "manifest_version": 2,
-    "name": "Getting started example",
-    "description": "This extension allows the user to change the background color of the current page.",
-    "version": "1.0",
-    "browser_action": {
-        "default_icon": "icon.png",
-        "default_popup": "./options.html"
-    },
-    "background": {
-        "page": "./dist/index.html"
-    },
-    "permissions": [
-        "activeTab",
-        "storage",
-        "tabs",
-        "https://*/*"
-    ],
-    "content_security_policy": "style-src https://cdn.jsdelivr.net https://maxcdn.bootstrapcdn.com 'self';script-src https://cdn.jsdelivr.net 'self'; object-src 'self' ;"
+  "manifest_version": 2,
+  "name": "translate-md-viewer",
+  "description": "This extension is translate english website to md",
+  "version": "1.0",
+  "browser_action": {
+    "default_icon": "icon.png",
+    "default_popup": "./dist/options.html"
+  },
+  "background": {
+    "page": "./dist/index.html"
+  },
+  "icons": {
+    "16": "./icon/translate-16.png",
+    "48": "./icon/translate-48.png",
+    "128": "./icon/translate-128.png"
+  },
+  "permissions": [
+    "activeTab",
+    "storage",
+    "tabs",
+    "https://*/*"
+  ],
+  "content_security_policy": "style-src https://cdn.jsdelivr.net https://maxcdn.bootstrapcdn.com 'self';script-src https://cdn.jsdelivr.net 'self'; object-src 'self' ;"
 }

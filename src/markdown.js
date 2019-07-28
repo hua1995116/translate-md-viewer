@@ -1,53 +1,12 @@
 
 
-let mainDiv = document.querySelector('.main')
-const MEDIUM_IMG_CDN = 'https://cdn-images-1.medium.com/max/'
-let simplemdeFrom = null;
-
-window.onload = function() {
-    document.getElementById('save').onclick = function() {
-      exportMedium();
-    }
-}
-
-// document.querySelector('.copy').addEventListener('click', function () {
-//   copyBtn.innerText = 'copied'
-//   const value = document.querySelector('#source').value
-//   copyToClipboard(value);
-//   setTimeout(function() {
-//     copyBtn.innerText = 'copy to clipboard'
-//   }, 2000)
-// })
-
-// document.querySelector('.history').addEventListener('click', function() {
-//   displayHistory()
-//   document.querySelector('.history-list').addEventListener('click', function (event) {
-//     const parentLi = event.target.parentElement
-//     const deletedKey = parentLi.firstElementChild.innerText
-//     parentLi.remove()
-//     localStorage.removeItem(deletedKey)
-//   })
-// })
-
-function createLoadForm() {
-  let shadow = document.createElement('div')
-  shadow.id = 'shadow'
-  const oHeight = document.documentElement.scrollHeight
-  shadow.style.height = oHeight + 'px'
-  mainDiv.appendChild(shadow)
-}
-
-function cancelLoad() {
-  const len = mainDiv.childNodes.length
-  mainDiv.removeChild(mainDiv.childNodes[len - 1])
-  loadIcon.style.visibility = 'hidden'
-}
+const MEDIUM_IMG_CDN = 'https://cdn-images-1.medium.com/max/';
 
 function exportMedium() {
   chrome.tabs.query({ active: true, currentWindow: true }, function (arrayOfTabs) {
     const activeTab = arrayOfTabs[0]
     const url = activeTab.url + '?format=json'
-    isHtml = (url.indexOf('elastic') !== -1 || url.indexOf('logz.io/blog') !== -1)
+    var isHtml = (url.indexOf('elastic') !== -1 || url.indexOf('logz.io/blog') !== -1)
     fetch(url)
       .then(function (res) {
         if (res.ok) {
@@ -75,47 +34,24 @@ function exportMedium() {
           const story = parseJsonToMarkdown(res)
           markdownText = story.markdown.join('')
           title = story.title
-        }      
+        }
         saveHistory(title, activeTab.url)
-        // cancelLoad()
-        // console.log(markdownText);
-        
-        // simplemdeFrom.value(markdownText);
-        // handletranslate(markdownText);
+
         localStorage.setItem('translate', markdownText);
-        chrome.tabs.create({url: chrome.extension.getURL('./dist/index.html')});
-        // document.querySelector('#source').value = markdownText;
       })
       .catch(function (err) {
         console.error(err)
         document.querySelector('.left-area').display = 'none'
-        markdownText = 'The website site ' + activeTab.url + ' may is not supported now.\nThe error infomation is:' + err + 
+        markdownText = 'The website site ' + activeTab.url + ' may is not supported now.\nThe error infomation is:' + err +
                   '.\nIt is appreciated that you can attach the error information at [issue](https://github.com/neal1991/export-medium/issues). '
                   + 'You can click the "copy to clipboard" button to copy the information to the clipboard. Thanks.'
-        // document.querySelector('#source').value = markdownText
-        // console.log(markdownText);
-        // cancelLoad()
+        localStorage.setItem('translate', markdownText);
       })
   })
 }
 
 function saveHistory(title, url) {
   localStorage.setItem(title, url);
-}
-
-function displayHistory() {
-  let list = ''
-  for (const ele in localStorage) {
-    const title = ele
-    if (localStorage.hasOwnProperty(ele)) {
-      const url = localStorage.getItem(title)
-      const str = '* [' + title + '](' + url + ') ![trash](icons/trash-can.png)\n'
-      list = list + str
-    }
-  }
-  rightAreaDiv.innerHTML = snarkdown(list)
-  rightAreaDiv.querySelector('ul').className = 'history-list'
-  sourceDiv.style.display = 'none'
 }
 
 function parseJsonToMarkdown(jsonStr) {
@@ -159,7 +95,7 @@ function parseJsonToMarkdown(jsonStr) {
       sequence = 0
     }
     const text = processParagraph(p, sequence);
-    lastPtype = p.type;
+    const lastPtype = p.type;
     if (text !== story.markdown[i]) {
       story.markdown.push(text)
     }
@@ -184,7 +120,7 @@ function processParagraph(p, sequence) {
     let j = 0
     for (; j < markups_array.length; j++) {
       if (markups_array[j]) {
-        token = text.substring(previousIndex, j)
+        const token = text.substring(previousIndex, j)
         previousIndex = j
         tokens.push(token)
         tokens.push(markups_array[j])
@@ -331,3 +267,5 @@ function copyToClipboard(input) {
   return success;
 }
 
+
+export default exportMedium;

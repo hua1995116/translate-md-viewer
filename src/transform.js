@@ -1,21 +1,48 @@
 const axios = require("axios");
-const translate = require("../translate");
+const translate = require("./translate");
 const qs = require("qs");
 const SymbolMap = require('./map');
 
 window.onload = function() {
-  const simplemdeFrom = new SimpleMDE({ 
+  const toolbar = [
+    'bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'ordered-list',
+    'link', 'image', 'preview', 'side-by-side', 'fullscreen',
+  {
+    name: "custom",
+    action: function customFunction(editor){
+      console.log(editor.value())
+      downloadText(editor.value(), `translate-${+new Date()}.md`);
+    },
+    className: "fa fa-download",
+    title: "Custom Button",
+  }];
+  const simplemdeFrom = new SimpleMDE({
     element: document.getElementById("markdown-editor-from"),
     spellChecker: false,
+    toolbar,
   });
-  
-  const simplemdeTo = new SimpleMDE({ 
+
+  const simplemdeTo = new SimpleMDE({
     element: document.getElementById("markdown-editor-to"),
     spellChecker: false,
+    toolbar,
   });
-  const translateData = localStorage.getItem('translate');
+  const translateData = localStorage.getItem('translate') || '';
   simplemdeFrom.value(translateData);
   handletranslate(simplemdeTo, translateData);
+}
+
+function downloadText(content, filename) {
+  const eleLink = document.createElement('a');
+  eleLink.download = filename;
+  eleLink.style.display = 'none';
+  // 字符内容转变成blob地址
+  const blob = new Blob([content]);
+  eleLink.href = URL.createObjectURL(blob);
+  // 触发点击
+  document.body.appendChild(eleLink);
+  eleLink.click();
+  // 然后移除
 }
 
 function handleScroll() {
@@ -46,6 +73,7 @@ function handleScroll() {
 }
 
 function handletranslate(markdown, data) {
+    const language = localStorage.getItem('language') || "zh-CN";
     translate
       .get(data, { tld: "cn" })
       .then(res => {
@@ -58,7 +86,7 @@ function handletranslate(markdown, data) {
           key: null,
           logld: "vTE_20190506_00",
           sl: "auto",
-          tl: "zh-CN",
+          tl: language,
           sp: "nmt",
           tc: 2,
           sr: 1,
