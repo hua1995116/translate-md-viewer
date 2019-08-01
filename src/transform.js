@@ -1,9 +1,12 @@
-const axios = require("axios");
-const translate = require("./translate");
-const qs = require("qs");
 const SymbolMap = require('./map');
+const googleTranslate = require('./translate/googleTranslate');
+const {markdown2ast,ast2markdown,i18nReplace,i18nTranslate} = require('./translate/index');
 
-window.onload = function() {
+function rmHtml(value) {
+  return value.match(/<b>(.*?)<\/b>/g).map(item => item.match(/<b>(.*)<\/b>/)[1]).join('');
+}
+
+window.onload = async function() {
   const toolbar = [
     'bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'ordered-list',
     'link', 'image', 'preview', 'side-by-side', 'fullscreen',
@@ -28,8 +31,29 @@ window.onload = function() {
     toolbar,
   });
   const translateData = localStorage.getItem('translate') || '';
+  const language = localStorage.getItem('language') || "zh-CN";
   simplemdeFrom.value(translateData);
-  handletranslate(simplemdeTo, translateData);
+
+  const markdownAst = markdown2ast(translateData);
+  const [replaceMarkdown, i18nMap] = i18nReplace(markdownAst);
+
+  const result = await googleTranslate(language, i18nMap);
+
+  const data = result.data[0];
+
+  const translateMap = data.map(item => {
+    const text = item[0][0][0];
+    if(text.indexOf('<b>') > -1) {
+      return rmHtml(text);
+    }
+    return text;
+  })
+
+  const translateAst = i18nTranslate(replaceMarkdown, translateMap);
+
+  const translateMarkdown = ast2markdown(translateAst);
+
+  simplemdeTo.value(translateMarkdown);
 }
 
 function downloadText(content, filename) {
@@ -72,49 +96,3 @@ function handleScroll() {
   }, 1000);
 }
 
-function handletranslate(markdown, data) {
-    const language = localStorage.getItem('language') || "zh-CN";
-    translate
-      .get(data, { tld: "cn" })
-      .then(res => {
-        // https://translate.googleapis.com/translate_a/t?anno=3&client=tee&format=html&v=1.0&key&logld=vTE_20190506_00&sl=auto&tl=zh-CN&sp=nmt&tc=2&sr=1&tk=151144.323280&mode=1
-        const query = {
-          anno: 3,
-          client: "webapp",
-          format: null,
-          v: 1.0,
-          key: null,
-          logld: "vTE_20190506_00",
-          sl: "auto",
-          tl: language,
-          sp: "nmt",
-          tc: 2,
-          sr: 1,
-          tk: res.value,
-          mode: 1
-        };
-        const options = {
-          method: "POST",
-          headers: { "content-type": "application/x-www-form-urlencoded" },
-          data: qs.stringify({
-            q: data
-          }),
-          url: `https://translate.googleapis.com/translate_a/t?${qs.stringify(
-            query
-          )}`
-        };
-        // console.log(options.url);
-        return axios(options);
-      })
-      .then(res => {
-        let result = res.data[0];
-        Object.keys(SymbolMap).map(item => {
-          result = result.replace(new RegExp(item, 'g'), SymbolMap[item]);
-        })
-        markdown.value(result);
-        handleScroll();
-      })
-      .catch(e => {
-        console.log(e);
-      });
-}
