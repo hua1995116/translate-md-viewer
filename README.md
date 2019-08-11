@@ -2,6 +2,8 @@
 
 > This is a chrome extension to solve problem that people look at English article hardly.
 
+[Download](https://github.com/hua1995116/translate-md-viewer/releases/download/v0.1.0/translate-md-viewer.crx)
+
 Result the following：
 
 ![1565512829379.jpg](https://s3.qiufengh.com/blog/1565512829379.jpg)
