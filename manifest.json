@@ -5,10 +5,10 @@
   "version": "1.0",
   "browser_action": {
     "default_icon": "icon.png",
-    "default_popup": "./dist/options.html"
+    "default_popup": "./dist/index.html"
   },
   "background": {
-    "page": "./dist/index.html"
+    "page": "./dist/bg.html"
   },
   "icons": {
     "16": "./icon/translate-16.png",

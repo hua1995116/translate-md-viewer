@@ -2,54 +2,44 @@
 
 const MEDIUM_IMG_CDN = 'https://cdn-images-1.medium.com/max/';
 
-function exportMedium(callback) {
-  chrome.tabs.query({ active: true, currentWindow: true }, function (arrayOfTabs) {
-    const activeTab = arrayOfTabs[0]
-    const url = activeTab.url + '?format=json'
-    var isHtml = (url.indexOf('elastic') !== -1 || url.indexOf('logz.io/blog') !== -1)
-    fetch(url)
-      .then(function (res) {
-        if (res.ok) {
-          return res.text()
+function exportMedium(originUrl, callback) {
+  const url = originUrl + '?format=json'
+  var isHtml = (url.indexOf('elastic') !== -1 || url.indexOf('logz.io/blog') !== -1)
+  fetch(url)
+    .then(function (res) {
+      if (res.ok) {
+        return res.text()
+      } else {
+        console.error('The fetch fails, and the response code is ' + res.status)
+      }
+    })
+    .then(function (res) {
+      let markdownText = ''
+      let title = ''
+      if (isHtml) {
+        const parser = new DOMParser()
+        const doc = parser.parseFromString(res, 'text/html')
+        var blog = doc.querySelector('.article-post-wrapper') || doc.querySelector('#content')
+        titleDoc = doc.querySelector('.full-bleed-data h2') || doc.querySelector('.container .text-center h1')
+        const title = titleDoc.innerText
+        const turndownService = new TurndownService()
+        if (title != null) {
+          markdownText = '# ' + title + '\n' + turndownService.turndown(blog)
         } else {
-          console.error('The fetch fails, and the response code is ' + res.status)
+          markdownText = turndownService.turndown(blog)
         }
-      })
-      .then(function (res) {
-        let markdownText = ''
-        let title = ''
-        if (isHtml) {
-          const parser = new DOMParser()
-          const doc = parser.parseFromString(res, 'text/html')
-          var blog = doc.querySelector('.article-post-wrapper') || doc.querySelector('#content')
-          titleDoc = doc.querySelector('.full-bleed-data h2') || doc.querySelector('.container .text-center h1')
-          const title = titleDoc.innerText
-          const turndownService = new TurndownService()
-          if (title != null) {
-            markdownText = '# ' + title + '\n' + turndownService.turndown(blog)
-          } else {
-            markdownText = turndownService.turndown(blog)
-          }
-        } else {
-          const story = parseJsonToMarkdown(res)
-          markdownText = story.markdown.join('')
-          title = story.title
-        }
-        saveHistory(title, activeTab.url)
-
-        localStorage.setItem('translate', markdownText);
-        callback();
-      })
-      .catch(function (err) {
-        console.error(err)
-        document.querySelector('.left-area').display = 'none'
-        markdownText = 'The website site ' + activeTab.url + ' may is not supported now.\nThe error infomation is:' + err +
-                  '.\nIt is appreciated that you can attach the error information at [issue](https://github.com/neal1991/export-medium/issues). '
-                  + 'You can click the "copy to clipboard" button to copy the information to the clipboard. Thanks.'
-        localStorage.setItem('translate', markdownText);
-        callback();
-      })
-  })
+      } else {
+        const story = parseJsonToMarkdown(res)
+        markdownText = story.markdown.join('')
+        title = story.title
+      }
+      saveHistory(title, activeTab.url)
+      callback(markdownText);
+    })
+    .catch(function (err) {
+      console.error(err)
+      callback(false);
+    })
 }
 
 function saveHistory(title, url) {

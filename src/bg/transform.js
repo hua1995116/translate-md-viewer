@@ -1,10 +1,11 @@
-const SymbolMap = require('./map');
-const googleTranslate = require('./translate/googleTranslate');
+
+// const googleTranslate = require('./translate/googleTranslate');
+import translate, { parseMultiple } from 'google-translate-open-api';
 const {markdown2ast,ast2markdown,i18nReplace,i18nTranslate} = require('./translate/index');
 
-function rmHtml(value) {
-  return value.match(/<b>(.*?)<\/b>/g).map(item => item.match(/<b>(.*)<\/b>/)[1]).join('');
-}
+// function rmHtml(value) {
+//   return value.match(/<b>(.*?)<\/b>/g).map(item => item.match(/<b>(.*)<\/b>/)[1]).join('');
+// }
 
 window.onload = async function() {
   const toolbar = [
@@ -37,17 +38,20 @@ window.onload = async function() {
   const markdownAst = markdown2ast(translateData);
   const [replaceMarkdown, i18nMap] = i18nReplace(markdownAst);
 
-  const result = await googleTranslate(language, i18nMap);
+  const result = await translate(i18nMap, {
+    to: language,
+    tld: "cn",
+  });
 
   const data = result.data[0];
-
-  const translateMap = data.map(item => {
-    const text = item[0][0][0];
-    if(text.indexOf('<b>') > -1) {
-      return rmHtml(text);
-    }
-    return text;
-  })
+  const translateMap = parseMultiple(data);
+  // const translateMap = data.map(item => {
+  //   const text = item[0][0][0];
+  //   if(text.indexOf('<b>') > -1) {
+  //     return rmHtml(text);
+  //   }
+  //   return text;
+  // })
 
   const translateAst = i18nTranslate(replaceMarkdown, translateMap);
 
