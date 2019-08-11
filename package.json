@@ -8,8 +8,8 @@
     "start-bg": "parcel bg.html",
     "dev-index": "parcel watch index.html --public-url .",
     "dev-bg": "parcel watch bg.html --public-url .",
-    "build-bg": "parcel build bg.html --public-url .",
-    "build": "parcel build index.html --public-url ."
+    "build-bg": "parcel build bg.html --public-url . --no-source-maps",
+    "build": "parcel build index.html --public-url . --no-source-maps"
   },
   "keywords": [],
   "author": "hua1995116 <qiufneghyf@gmail.com> (https://github.com/hua1995116)",
